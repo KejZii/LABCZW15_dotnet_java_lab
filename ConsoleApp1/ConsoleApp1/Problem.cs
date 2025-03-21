@@ -34,6 +34,15 @@ namespace ConsoleApp1
             }
         }
 
+        public Problem()
+        {
+            _itemsList!.Add(new Item { ID = 1, value = 1, wage = 1});
+            _itemsList!.Add(new Item { ID = 2, value = 1, wage = 1});
+            _itemsList!.Add(new Item { ID = 3, value = 1, wage = 1});
+            _itemsList!.Add(new Item { ID = 4, value = 1, wage = 1});
+            _itemsList!.Add(new Item { ID = 5, value = 1, wage = 1});
+        }
+
         public override string ToString()
         {
             string returnString = "";

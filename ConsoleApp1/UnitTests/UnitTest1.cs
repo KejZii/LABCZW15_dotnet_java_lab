@@ -24,5 +24,31 @@ namespace UnitTests
             Assert.AreEqual(0, result.valueSum);
             Assert.AreEqual(0, result.wageSum);
         }
+
+        [TestMethod]
+        public void TestItemValue()
+        {
+            int testValue = 5;
+            Problem problem = new Problem();
+            Result result = problem.Solve(testValue);
+            Assert.AreEqual(5, result.valueSum);
+        }
+
+        [TestMethod]
+        public void TestItemsAmount()
+        {
+            int testValue = 2;
+            Problem problem = new Problem();
+            Result result = problem.Solve(testValue);
+            Assert.AreEqual(testValue, result.itemsInSuc.Count);
+        }
+
+        [TestMethod]
+        public void TestIsListEmpty()
+        {
+            Problem problem = new Problem(0,1);
+            Result result = problem.Solve(0);
+            Assert.IsTrue(result.itemsInSuc.Count == 0);
+        }
     }
 }

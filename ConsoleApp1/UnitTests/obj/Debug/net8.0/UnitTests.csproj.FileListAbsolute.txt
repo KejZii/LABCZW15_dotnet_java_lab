@@ -114,3 +114,4 @@
 /home/niko/RiderProjects/ConsoleApp1/UnitTests/obj/Debug/net8.0/UnitTests.pdb
 /home/niko/RiderProjects/ConsoleApp1/UnitTests/obj/Debug/net8.0/UnitTests.genruntimeconfig.cache
 /home/niko/RiderProjects/ConsoleApp1/UnitTests/obj/Debug/net8.0/ref/UnitTests.dll
+/home/niko/RiderProjects/ConsoleApp1/UnitTests/obj/Debug/net8.0/UnitTests.sourcelink.json
