@@ -21,11 +21,6 @@ public class API
         Pokemons pokemon = JsonSerializer.Deserialize<Pokemons>(response)!;
         Console.WriteLine(pokemon.ToString());
         
-        // client = new HttpClient();
-        // string call = $"https://api.coincap.io/v2/assets/";
-        // string response = await client.GetStringAsync(call);
-        // Crypto crypto = JsonSerializer.Deserialize<Crypto>(response)!;
-        // Console.WriteLine(crypto.ToString());
     }
     
 }
