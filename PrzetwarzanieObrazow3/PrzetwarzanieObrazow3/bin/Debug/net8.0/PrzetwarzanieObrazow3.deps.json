@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "PrzetwarzanieObrazow3/1.0.0": {
+        "runtime": {
+          "PrzetwarzanieObrazow3.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "PrzetwarzanieObrazow3/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

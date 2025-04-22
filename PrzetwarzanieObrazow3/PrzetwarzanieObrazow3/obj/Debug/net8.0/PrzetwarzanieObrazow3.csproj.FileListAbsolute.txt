@@ -1,0 +1,15 @@
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/PrzetwarzanieObrazow3.GeneratedMSBuildEditorConfig.editorconfig
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/PrzetwarzanieObrazow3.AssemblyInfoInputs.cache
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/PrzetwarzanieObrazow3.AssemblyInfo.cs
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/PrzetwarzanieObrazow3.csproj.CoreCompileInputs.cache
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/PrzetwarzanieObrazow3.sourcelink.json
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/bin/Debug/net8.0/PrzetwarzanieObrazow3
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/bin/Debug/net8.0/PrzetwarzanieObrazow3.deps.json
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/bin/Debug/net8.0/PrzetwarzanieObrazow3.runtimeconfig.json
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/bin/Debug/net8.0/PrzetwarzanieObrazow3.dll
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/bin/Debug/net8.0/PrzetwarzanieObrazow3.pdb
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/PrzetwarzanieObrazow3.dll
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/refint/PrzetwarzanieObrazow3.dll
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/PrzetwarzanieObrazow3.pdb
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/PrzetwarzanieObrazow3.genruntimeconfig.cache
+/home/niko/RiderProjects/PrzetwarzanieObrazow3/PrzetwarzanieObrazow3/obj/Debug/net8.0/ref/PrzetwarzanieObrazow3.dll
