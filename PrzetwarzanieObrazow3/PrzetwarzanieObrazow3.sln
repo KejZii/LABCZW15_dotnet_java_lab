@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrzetwarzanieObrazow3", "PrzetwarzanieObrazow3\PrzetwarzanieObrazow3.csproj", "{BE4A5410-0D11-40AF-A8BA-6EA087CFF74D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI2", "GUI2\GUI2.csproj", "{73E1E958-82BF-4AD3-AB19-3A85102B0E01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{BE4A5410-0D11-40AF-A8BA-6EA087CFF74D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE4A5410-0D11-40AF-A8BA-6EA087CFF74D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE4A5410-0D11-40AF-A8BA-6EA087CFF74D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73E1E958-82BF-4AD3-AB19-3A85102B0E01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73E1E958-82BF-4AD3-AB19-3A85102B0E01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73E1E958-82BF-4AD3-AB19-3A85102B0E01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73E1E958-82BF-4AD3-AB19-3A85102B0E01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
