@@ -1,0 +1,119 @@
+﻿@page "/weather"
+@rendermode InteractiveServer
+@using System.Linq
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates showing data from a service.</p>
+
+<div class="mb-3">
+    <input class="form-control" @oninput="FilterByDayName" placeholder="Filter by weather" />
+</div>
+
+<p role="status">Warm days (above 15°C): @warmDays</p>
+
+<button class="btn btn-primary me-2" @onclick="FilterWarmDays">Show only warm days</button>
+<button class="btn btn-secondary" @onclick="RestoreForecast">Restore all days</button>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast[]? forecasts;
+    private WeatherForecast[] ? originalForecasts;
+    private int warmDays = 0;
+    
+    protected override void OnInitialized()
+    {
+        var startDate = DateOnly.FromDateTime(DateTime.Now);
+        forecasts = Enumerable.Range(1, 10).Select(index => new WeatherForecast
+        {
+            Date = startDate.AddDays(index),
+            TemperatureC = Random.Shared.Next(-20, 35),
+            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+        }).ToArray();
+        
+        warmDays = forecasts.Count(f => f.TemperatureC > 15);
+        
+        originalForecasts = forecasts.ToArray();
+    }
+    
+    private void FilterWarmDays()
+    {
+        if (originalForecasts != null)
+        {
+            forecasts = originalForecasts.Where(f => f.TemperatureC > 15).ToArray();
+            warmDays = forecasts.Length;
+        }
+    }
+    
+    private void RestoreForecast()
+    {
+        if (originalForecasts != null)
+        {
+            forecasts = originalForecasts.ToArray();
+            warmDays = forecasts.Count(f => f.TemperatureC > 15);
+        }
+    }
+    
+    private void FilterByDayName(ChangeEventArgs e)
+    {
+        if (originalForecasts != null)
+        {
+            var filterValue = e.Value?.ToString();
+            if (string.IsNullOrWhiteSpace(filterValue))
+            {
+                forecasts = originalForecasts.ToArray();
+            }
+            else
+            {
+                forecasts = originalForecasts
+                    .Where(f => f.Summary.Contains(filterValue, StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+            }
+            
+            warmDays = forecasts.Count(f => f.TemperatureC > 15);
+        }
+    }
+    
+    private static readonly string[] Summaries = new[]
+    {
+        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+    };
+    
+    public class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+        public int TemperatureC { get; set; }
+        public string? Summary { get; set; }
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}
