@@ -1,0 +1,305 @@
+﻿@page "/movies/create"
+@attribute [Authorize]
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using BlazorApp1.Data
+@using BlazorApp1.Models
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext Context
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+<PageTitle>Add new movie</PageTitle>
+
+<div class="add-movie-container">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h1 class="mb-0"><i class="bi bi-film me-2"></i>Add new movie</h1>
+        </div>
+        <div class="card-body">
+            <EditForm Model="@movie" OnValidSubmit="SubmitMovie" FormName="movieForm">
+                <DataAnnotationsValidator />
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="validation-errors mb-4">
+                            <ValidationSummary />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="title" class="form-label fw-bold">
+                                <i class="bi bi-type me-1"></i> Title
+                            </label>
+                            <input type="text" id="title" class="form-control form-control-lg" @bind="movie.Title" placeholder="Enter movie title" />
+                            <ValidationMessage For="@(() => movie.Title)" class="text-danger" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-bold">
+                                <i class="bi bi-text-paragraph me-1"></i> Description
+                            </label>
+                            <InputTextArea id="description" class="form-control" @bind-Value="movie.Description" 
+                                          rows="5" placeholder="Enter movie description" />
+                            <ValidationMessage For="@(() => movie.Description)" class="text-danger" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="releaseDate" class="form-label fw-bold">
+                                        <i class="bi bi-calendar-event me-1"></i> Release date
+                                    </label>
+                                    <InputDate id="releaseDate" class="form-control" @bind-Value="movie.ReleaseDate" />
+                                    <ValidationMessage For="@(() => movie.ReleaseDate)" class="text-danger" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="rate" class="form-label fw-bold">
+                                        <i class="bi bi-star-fill me-1"></i> Rating (1-10)
+                                    </label>
+                                    <div class="input-group">
+                                        <InputNumber id="rate" class="form-control" @bind-Value="movie.Rate" min="1" max="10" />
+                                        <span class="input-group-text bg-primary text-white">/ 10</span>
+                                    </div>
+                                    <ValidationMessage For="@(() => movie.Rate)" class="text-danger" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="imageUrl" class="form-label fw-bold">
+                                <i class="bi bi-image me-1"></i> Image URL
+                            </label>
+                            <InputText id="imageUrl" class="form-control" @bind-Value="movie.ImageUrl" 
+                                      placeholder="https://example.com/image.jpg" />
+                            <ValidationMessage For="@(() => movie.ImageUrl)" class="text-danger" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="youtubeTrailerId" class="form-label fw-bold">
+                                <i class="bi bi-youtube me-1"></i> YouTube Trailer ID
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">youtube.com/watch?v=</span>
+                                <InputText id="youtubeTrailerId" class="form-control" @bind-Value="movie.YoutubeTrailerId"
+                                           placeholder="np. dQw4w9WgXcQ" />
+                            </div>
+                            <div class="form-text">Wpisz identyfikator filmu z YouTube (część adresu URL po 'v=')</div>
+                            <ValidationMessage For="@(() => movie.YoutubeTrailerId)" class="text-danger" />
+                        </div>
+
+                        <div class="action-buttons mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save me-2"></i> Save
+                            </button>
+                            <a href="/movies" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i> Cancel
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="image-preview-container">
+                            @if (!string.IsNullOrEmpty(movie.ImageUrl))
+                            {
+                                <div class="image-preview">
+                                    <img src="@movie.ImageUrl" alt="Image preview" class="img-fluid rounded shadow" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="image-preview-placeholder">
+                                    <i class="bi bi-card-image"></i>
+                                    <p>Image preview</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+<style>
+    .add-movie-container {
+        max-width: 1000px;
+        margin: 30px auto;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        padding: 20px;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+    }
+    
+    .card-header h1 {
+        font-size: 28px;
+        font-weight: 600;
+    }
+    
+    .card-body {
+        padding: 30px;
+    }
+    
+    .form-label {
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        border-radius: 5px;
+        padding: 12px;
+        border: 1px solid #dfe6e9;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+    
+    .input-group-text {
+        background-color: #3498db;
+        border: none;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+    }
+    
+    .btn-primary {
+        background-color: #3498db;
+        border: none;
+        padding: 12px 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline-secondary {
+        border: 1px solid #95a5a6;
+        color: #7f8c8d;
+        padding: 12px 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #ecf0f1;
+        color: #34495e;
+    }
+    
+    .image-preview-container {
+        height: 300px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px dashed #dfe6e9;
+    }
+    
+    .image-preview {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    
+    .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .image-preview-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        color: #b2bec3;
+    }
+    
+    .image-preview-placeholder i {
+        font-size: 64px;
+        margin-bottom: 15px;
+    }
+    
+    .image-preview-placeholder p {
+        font-size: 18px;
+        margin: 0;
+    }
+    
+    .validation-errors {
+        color: #e74c3c;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #ffeaea;
+    }
+</style>
+
+@code {
+    private Movie movie = new();
+    private async Task SubmitMovie()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+            if (string.IsNullOrEmpty(userId))
+            {
+                Context.Movies.Add(movie);
+                await Context.SaveChangesAsync();
+                Navigation.NavigateTo("/movies");
+                return;
+            }
+            
+            if (movie.Rate > 0)
+            {
+                movie.AverageRating = (float)movie.Rate;
+                movie.RatingsCount = 1;
+            }
+            else
+            {
+                movie.AverageRating = 0;
+                movie.RatingsCount = 0;
+            }
+            
+            Context.Movies.Add(movie);
+            await Context.SaveChangesAsync();
+            
+            if (movie.Rate > 0)
+            {
+                var userRating = new UserRating
+                {
+                    MovieId = movie.Id,
+                    UserId = userId,
+                    Rating = (int)movie.Rate
+                };
+                
+                Context.UserRatings.Add(userRating);
+                await Context.SaveChangesAsync();
+            }
+        
+            Navigation.NavigateTo("/movies");
+        }
+        catch (Exception)
+        {
+        }
+    }
+}

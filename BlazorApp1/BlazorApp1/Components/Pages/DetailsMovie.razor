@@ -1,0 +1,520 @@
+﻿@page "/movies/details/{Id:int}"
+@attribute [Authorize]
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp1.Data
+@using BlazorApp1.Models
+@inject ApplicationDbContext Context
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+<PageTitle>Movie Details</PageTitle>
+
+@if (movie == null)
+{
+    <div class="loading-container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="loading-text">Loading movie details...</p>
+    </div>
+}
+else
+{
+    <div class="movie-details-container">
+        <div class="movie-header">
+            <div class="d-flex align-items-center mb-4">
+                <h1 class="mb-0">@movie.Title</h1>
+            </div>
+            <div class="movie-meta-badges">
+                @if (movie.ReleaseDate != default)
+                {
+                    <span class="movie-badge release-date">
+                        <i class="bi bi-calendar-event"></i> @(movie.ReleaseDate != default ? movie.ReleaseDate.Value.ToString("dd.MM.yyyy") : "Not provided")
+                    </span>
+                }
+                
+                <span class="movie-badge rating">
+                    <i class="bi bi-star-fill"></i>
+                    @(movie.RatingsCount > 0 ? movie.AverageRating.ToString("F1") : "No ratings")
+                    <small class="votes-count">(@movie.RatingsCount @(GetVotesText(movie.RatingsCount)))</small>
+                </span>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-lg-4 col-md-5 order-md-2 mb-4">
+                    <div class="movie-poster-container">
+                        @if (!string.IsNullOrEmpty(movie.ImageUrl))
+                        {
+                            <img src="@movie.ImageUrl" class="movie-poster" alt="Movie poster for @movie.Title" />
+                        }
+                        else
+                        {
+                            <div class="no-poster">
+                                <i class="bi bi-film"></i>
+                                <span>No poster</span>
+                            </div>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(movie.YoutubeTrailerId))
+                    {
+                        <div class="trailer-section mt-4">
+                            <h4><i class="bi bi-film me-2"></i>Zwiastun</h4>
+                            <div class="ratio ratio-16x9">
+                                <iframe
+                                    src="https://www.youtube.com/embed/@movie.YoutubeTrailerId"
+                                    title="Zwiastun filmu @movie.Title"
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                        </div>
+                    }
+
+
+                    @if (AuthenticationStateTask.Result.User.Identity.IsAuthenticated)
+                    {
+                        <div class="rating-card">
+                            <div class="rating-card-header">
+                                <h4><i class="bi bi-star me-2"></i>Your Rating</h4>
+                            </div>
+                            <div class="rating-card-body">
+                                <div class="current-rating">
+                                    @if (userRating > 0)
+                                    {
+                                        <div class="user-rating-display">
+                                            <span class="user-rating-value">@userRating</span>
+                                            <span class="user-rating-max">/10</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="no-rating-yet">
+                                            <i class="bi bi-emoji-neutral"></i>
+                                            <span>You haven't rated yet</span>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                <div class="rating-selector">
+                                    <select class="form-select" @bind="userRating">
+                                        <option value="0">Select rating</option>
+                                        @for (int i = 1; i <= 10; i++)
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    </select>
+                                    
+                                    <button class="btn btn-primary w-100 mt-3" @onclick="SaveRating">
+                                        <i class="bi bi-check2-circle me-2"></i>Save Rating
+                                    </button>
+                                </div>
+                                
+                                @if (!string.IsNullOrEmpty(ratingMessage))
+                                {
+                                    <div class="rating-message @(ratingSuccess ? "success" : "error")">
+                                        <i class="bi @(ratingSuccess ? "bi-check-circle" : "bi-exclamation-circle")"></i>
+                                        @ratingMessage
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="login-prompt-card">
+                            <div class="login-prompt-content">
+                                <i class="bi bi-lock"></i>
+                                <p>Log in to rate this movie</p>
+                                <a href="/Identity/Account/Login" class="btn btn-outline-primary">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Log in
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                <div class="col-lg-8 col-md-7 order-md-1">
+                    <div class="movie-description-card">
+                        <div class="movie-description-header">
+                            <h3><i class="bi bi-info-circle me-2"></i>Movie Description</h3>
+                        </div>
+                        <div class="movie-description-content">
+                            @if (!string.IsNullOrEmpty(movie.Description))
+                            {
+                                <p>@movie.Description</p>
+                            }
+                            else
+                            {
+                                <p class="no-description">No movie description</p>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="movie-actions mt-4">
+                        <a href="/movies" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 300px;
+    }
+    
+    .loading-text {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #6c757d;
+    }
+    
+    .movie-details-container {
+        max-width: 1200px;
+        margin: 30px auto;
+    }
+    
+    .movie-header {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 20px;
+    }
+    
+    .movie-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #212529;
+    }
+    
+    .back-button {
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        font-size: 1.2rem;
+    }
+    
+    .movie-meta-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .movie-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .movie-badge i {
+        margin-right: 6px;
+    }
+    
+    .release-date {
+        background-color: #e3f2fd;
+        color: #0d6efd;
+    }
+    
+    .rating {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .votes-count {
+        opacity: 0.8;
+        margin-left: 5px;
+    }
+    
+    .content-wrapper {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .movie-poster-container {
+        margin-bottom: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        background-color: #000;
+        height: 400px;
+    }
+    
+    .movie-poster {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .no-poster {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #e9ecef;
+        color: #6c757d;
+    }
+    
+    .no-poster i {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+    
+    .movie-description-card {
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .movie-description-header {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .movie-description-header h3 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 600;
+    }
+    
+    .movie-description-content {
+        padding: 20px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    
+    .no-description {
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    .rating-card, .login-prompt-card {
+        margin-top: 20px;
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .rating-card-header {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .rating-card-header h4 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    .rating-card-body {
+        padding: 20px;
+    }
+    
+    .current-rating {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .user-rating-display {
+        display: inline-flex;
+        align-items: baseline;
+    }
+    
+    .user-rating-value {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffc107;
+    }
+    
+    .user-rating-max {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin-left: 5px;
+    }
+    
+    .no-rating-yet {
+        color: #6c757d;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .no-rating-yet i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .rating-message {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .rating-message i {
+        margin-right: 8px;
+    }
+    
+    .rating-message.success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .rating-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .login-prompt-card {
+        text-align: center;
+        padding: 30px 20px;
+    }
+    
+    .login-prompt-content i {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+    
+    .login-prompt-content p {
+        margin-bottom: 20px;
+        color: #6c757d;
+    }
+    
+    .movie-actions {
+        display: flex;
+        gap: 10px;
+    }
+</style>
+
+@code {
+    private int userRating = 0;
+    private string userId;
+    private UserRating existingRating;
+    private bool ratingSuccess = false;
+    private string ratingMessage = string.Empty;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    [Parameter] public int Id { get; set; }
+    private Movie? movie;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            movie = await Context.Movies.FindAsync(Id);
+            if (movie == null)
+            {
+                Navigation.NavigateTo("/movies");
+                return;
+            }
+            
+            var authState = await AuthenticationStateTask;
+            if (authState.User.Identity.IsAuthenticated)
+            {
+                userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    existingRating = await Context.UserRatings
+                        .FirstOrDefaultAsync(r => r.UserId == userId && r.MovieId == Id);
+                
+                    if (existingRating != null)
+                    {
+                        userRating = existingRating.Rating;
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            Navigation.NavigateTo("/movies");
+        }
+    }
+
+    private async Task SaveRating()
+    {
+        try
+        {
+            if (userRating < 1 || userRating > 10)
+            {
+                ratingSuccess = false;
+                ratingMessage = "Please select a rating between 1 and 10.";
+                return;
+            }
+
+            if (existingRating != null)
+            {
+                // Update existing rating
+                movie.AverageRating = ((movie.AverageRating * movie.RatingsCount) - existingRating.Rating + userRating) / movie.RatingsCount;
+                existingRating.Rating = userRating;
+                Context.UserRatings.Update(existingRating);
+            }
+            else
+            {
+                // Add new rating
+                var newRating = new UserRating
+                {
+                    MovieId = Id,
+                    UserId = userId,
+                    Rating = userRating
+                };
+
+                // Update movie average rating
+                float totalRating = movie.AverageRating * movie.RatingsCount;
+                movie.RatingsCount++;
+                movie.AverageRating = (totalRating + userRating) / movie.RatingsCount;
+                
+                Context.UserRatings.Add(newRating);
+                existingRating = newRating;
+            }
+
+            Context.Movies.Update(movie);
+            await Context.SaveChangesAsync();
+            
+            ratingSuccess = true;
+            ratingMessage = "Your rating has been saved!";
+        }
+        catch (Exception)
+        {
+            ratingSuccess = false;
+            ratingMessage = "An error occurred while saving your rating. Please try again.";
+        }
+    }
+    
+    private string GetVotesText(int count)
+    {
+        if (count == 1)
+            return "vote";
+        
+        return "votes";
+    }
+}

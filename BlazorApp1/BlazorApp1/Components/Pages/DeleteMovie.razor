@@ -1,0 +1,91 @@
+﻿@page "/movies/delete/{Id:int}"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp1.Data
+@inject ApplicationDbContext Context
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+<PageTitle>Usuń film</PageTitle>
+
+@if (movie == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <h1>Usuń film</h1>
+
+    <div class="alert alert-danger">
+        <h3>Czy na pewno chcesz usunąć film "@movie.Title"?</h3>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button @onclick="ConfirmDelete" class="btn btn-danger">Usuń</button>
+        <button @onclick="Cancel" class="btn btn-secondary">Anuluj</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger mt-3">
+            @errorMessage
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Movie? movie;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            movie = await Context.Movies.FindAsync(Id);
+            if (movie == null)
+            {
+                Navigation.NavigateTo("/movies");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Wystąpił błąd podczas ładowania filmu: {ex.Message}";
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/movies");
+    }
+
+    private async Task ConfirmDelete()
+    {
+        try
+        {
+            var movieToDelete = await Context.Movies.FindAsync(Id);
+            if (movieToDelete == null)
+            {
+                errorMessage = "Film nie został znaleziony.";
+                return;
+            }
+
+            Context.Movies.Remove(movieToDelete);
+            await Context.SaveChangesAsync();
+            Navigation.NavigateTo("/movies");
+        }
+        catch (DbUpdateException ex)
+        {
+            errorMessage = $"Nie można usunąć filmu z powodu błędu bazy danych: {ex.InnerException?.Message ?? ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Wystąpił nieoczekiwany błąd: {ex.Message}";
+        }
+    }
+}
+
+
+

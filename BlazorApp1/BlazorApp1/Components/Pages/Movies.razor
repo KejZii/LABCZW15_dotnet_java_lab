@@ -1,0 +1,342 @@
+﻿@page "/movies"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using System.Linq
+@using BlazorApp1.Data
+@inject ApplicationDbContext Context
+@inject NavigationManager Navigation
+
+<PageTitle>Movies</PageTitle>
+
+<div class="movies-container">
+    <h1 class="movies-title">Movies Collection</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <AuthorizeView>
+                <Authorized>
+                    <NavLink href="/movies/create" class="btn btn-create">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Movie
+                    </NavLink>
+                </Authorized>
+            </AuthorizeView>
+        </div>
+    </div>
+
+    <div class="table-responsive movie-table-container">
+        <table class="table movie-table">
+            <thead>
+            <tr>
+                <th><a @onclick="@(() => SortBy("Title"))" class="sort-link">Title @GetSortIcon("Title")</a></th>
+                <th><a @onclick="@(() => SortBy("ReleaseDate"))" class="sort-link">Release Date @GetSortIcon("ReleaseDate")</a></th>
+                <th><a @onclick="@(() => SortBy("AverageRating"))" class="sort-link">Average Rating @GetSortIcon("AverageRating")</a></th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (filteredMovies.Any())
+            {
+                @foreach (var movie in filteredMovies)
+                {
+                    <tr>
+                        <td>@movie.Title</td>
+                        <td>@(movie.ReleaseDate?.ToShortDateString() ?? "-")</td>
+                        <td>
+                            <div class="rating-display">
+                                <div class="stars-container">
+                                    @{
+                                        var ratingValue = movie.AverageRating / 2; // Konwersja skali 10-punktowej na 5 gwiazdek
+                                        for (var i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Math.Floor(ratingValue))
+                                            {
+                                                <span class="star star-full">★</span>
+                                            }
+                                            else if (i - 0.5 <= ratingValue)
+                                            {
+                                                <span class="star star-half">
+                                                    <span class="half">★</span>
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="star star-empty">☆</span>
+                                            }
+                                        }
+                                    }
+                                </div>
+                                <span class="rating-value">@(movie.AverageRating.ToString("F1") ?? "-")</span>
+                                <span class="rating-count">(@movie.RatingsCount votes)</span>
+                            </div>
+                        </td>
+                        <td class="action-buttons">
+                            <a href="/movies/details/@movie.Id" class="btn btn-details">
+                                <i class="bi bi-eye"></i> Details
+                            </a>
+                            <a href="/movies/delete/@movie.Id" class="btn btn-delete">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center py-4">
+                        <div class="no-results">
+                            <i class="bi bi-search fs-1 mb-2"></i>
+                            <p>No movies found</p>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .movies-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .movies-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    
+    .movie-table-container {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .movie-table {
+        margin-bottom: 0;
+    }
+    
+    .movie-table thead {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .movie-table th {
+        padding: 15px;
+        font-weight: 500;
+    }
+    
+    .movie-table td {
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
+    
+    .movie-table tbody tr:nth-child(odd) {
+        background-color: #f8f9fa;
+    }
+    
+    .movie-table tbody tr:hover {
+        background-color: #e8f4f8;
+    }
+    
+    .sort-link {
+        color: white;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .sort-link:hover {
+        color: #f0f0f0;
+    }
+    
+    .rating-display {
+        display: flex;
+        align-items: center;
+    }
+    
+    .rating-value {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin-left: 10px;
+    }
+    
+    .rating-count {
+        margin-left: 5px;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn-create {
+        background-color: #2ecc71;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    
+    .btn-create:hover {
+        background-color: #27ae60;
+        transform: translateY(-2px);
+    }
+    
+    .btn-details {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn-details:hover {
+        background-color: #2980b9;
+    }
+    
+    .btn-delete {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn-delete:hover {
+        background-color: #c0392b;
+    }
+
+    .no-results {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #7f8c8d;
+        padding: 20px;
+    }
+    
+    /* Star rating display */
+    .stars-container {
+        display: flex;
+        align-items: center;
+    }
+    
+    .star {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        color: #dfe6e9;
+        position: relative;
+    }
+    
+    .star-full {
+        color: #f1c40f;
+    }
+    
+    .star-empty {
+        color: #dfe6e9;
+    }
+    
+    .star-half {
+        position: relative;
+        color: #dfe6e9;
+    }
+    
+    .star-half .half {
+        position: absolute;
+        display: block;
+        width: 10px;
+        height: 20px;
+        overflow: hidden;
+        color: #f1c40f;
+    }
+</style>
+
+@code {
+    private List<Movie> allMovies = new();
+    private List<Movie> filteredMovies = new();
+    private string currentSortColumn = "AverageRating";
+    private bool ascending = false;  // Domyślne sortowanie malejące
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMovies();
+    }
+
+    private async Task LoadMovies()
+    {
+        allMovies = await Context.Movies
+            .AsNoTracking()
+            .ToListAsync();
+        
+        ApplySort();
+        filteredMovies = new List<Movie>(allMovies);
+    }
+
+    private void SortBy(string columnName)
+    {
+        if (currentSortColumn == columnName)
+        {
+            ascending = !ascending;
+        }
+        else
+        {
+            currentSortColumn = columnName;
+            ascending = false;
+        }
+        
+        ApplySort();
+        StateHasChanged();
+    }
+
+    private string GetSortIcon(string columnName)
+    {
+        if (currentSortColumn != columnName)
+            return "";
+            
+        return ascending ? "↑" : "↓";
+    }
+
+    private void ApplySort()
+    {
+        allMovies = currentSortColumn switch
+        {
+            "Title" => ascending 
+                ? allMovies.OrderBy(m => m.Title).ToList() 
+                : allMovies.OrderByDescending(m => m.Title).ToList(),
+            "ReleaseDate" => ascending 
+                ? allMovies.OrderBy(m => m.ReleaseDate ?? DateTime.MaxValue).ToList()
+                : allMovies.OrderByDescending(m => m.ReleaseDate ?? DateTime.MinValue).ToList(),
+            "AverageRating" => ascending 
+                ? allMovies.OrderBy(m => m.AverageRating).ToList()
+                : allMovies.OrderByDescending(m => m.AverageRating).ToList(),
+            _ => allMovies
+        };
+        
+        filteredMovies = new List<Movie>(allMovies);
+    }
+}
